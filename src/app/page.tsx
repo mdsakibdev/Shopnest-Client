@@ -1,69 +1,89 @@
-import Image from "next/image";
+import { Banknote, RefreshCcw, ShieldCheck, Truck } from "lucide-react";
+import HeroSlider from "@/components/home/HeroSlider";
+import TopCategories from "@/components/home/TopCategories";
+import ProductSection from "@/components/home/ProductSection";
+import { playfair } from "@/lib/fonts";
 
-export default function Home() {
+// Home page (Server Component) — it only arranges the sections.
+// Each section is a Client Component that loads its own data.
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main>
+      <HeroSlider />
+      <TopCategories />
+
+      <ProductSection
+        title="Flash Sale"
+        subtitle="Big discounts for a limited time — grab yours before stock runs out"
+        tag="Limited Time"
+        query="flashSale=true&limit=8"
+        viewAllLink="/shop"
+        bg="bg-red-50"
+      />
+
+      <ProductSection
+        title="Men's Collection"
+        subtitle="Panjabi, T-shirt, Shirt, Polo and more for men"
+        query="section=men&limit=8"
+        viewAllLink="/shop?section=men"
+      />
+
+      <ProductSection
+        title="Women's Collection"
+        subtitle="Saree, Three-Piece and Kurti for women"
+        query="section=women&limit=8"
+        viewAllLink="/shop?section=women"
+        bg="bg-[rgb(204,251,241)]/40"
+      />
+
+      <ProductSection
+        title="New Arrivals"
+        subtitle="The newest products in the shop"
+        query="limit=8"
+        viewAllLink="/shop"
+        bg="bg-zinc-50"
+      />
+
+      {/* Why Shop With Us — simple trust points, no data needed */}
+      <section>
+        <div className="mx-auto max-w-7xl px-4 py-12">
+          <h2
+            className={`${playfair.className} text-center text-3xl font-bold`}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Why Shop With Us
+          </h2>
+          <div className="mt-8 grid grid-cols-2 gap-6 text-center lg:grid-cols-4">
+            <div>
+              <Banknote className="mx-auto h-10 w-10 text-[rgb(13,148,136)]" />
+              <h3 className="mt-3 font-semibold">Cash on Delivery</h3>
+              <p className="mt-1 text-sm text-zinc-600">
+                Pay at your doorstep when the product arrives.
+              </p>
+            </div>
+            <div>
+              <Truck className="mx-auto h-10 w-10 text-[rgb(13,148,136)]" />
+              <h3 className="mt-3 font-semibold">Home Delivery</h3>
+              <p className="mt-1 text-sm text-zinc-600">
+                Fast delivery all over Bangladesh.
+              </p>
+            </div>
+            <div>
+              <RefreshCcw className="mx-auto h-10 w-10 text-[rgb(13,148,136)]" />
+              <h3 className="mt-3 font-semibold">Easy Exchange</h3>
+              <p className="mt-1 text-sm text-zinc-600">
+                Wrong size? Easy exchange within 7 days.
+              </p>
+            </div>
+            <div>
+              <ShieldCheck className="mx-auto h-10 w-10 text-[rgb(13,148,136)]" />
+              <h3 className="mt-3 font-semibold">Quality Checked</h3>
+              <p className="mt-1 text-sm text-zinc-600">
+                Every product is checked before dispatch.
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
