@@ -46,6 +46,9 @@ async function fetchRelated(
   return all.filter((p) => p._id !== excludeId).slice(0, 4);
 }
 
+// Words that go with each star rating in the review form
+const RATING_WORDS = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
+
 // A row of 5 stars — filled up to the given value
 function Stars({ value, size = "h-4 w-4" }: { value: number; size?: string }) {
   return (
@@ -406,9 +409,10 @@ export default function ProductDetails({ id }: { id: string }) {
                   type="button"
                   onClick={() => setRating(i)}
                   aria-label={`${i} star${i > 1 ? "s" : ""}`}
+                  className="cursor-pointer rounded-full p-1 hover:bg-amber-50"
                 >
                   <Star
-                    className={`h-7 w-7 ${
+                    className={`h-8 w-8 ${
                       i <= rating
                         ? "fill-amber-400 text-amber-400"
                         : "fill-zinc-200 text-zinc-200"
@@ -416,8 +420,13 @@ export default function ProductDetails({ id }: { id: string }) {
                   />
                 </button>
               ))}
-              <span className="ml-2 text-sm text-zinc-600">{rating}/5</span>
+              <span className="ml-2 text-sm font-medium text-zinc-600">
+                {rating}/5 — {RATING_WORDS[rating]}
+              </span>
             </div>
+            <p className="text-xs text-zinc-400">
+              Click a star to choose your rating.
+            </p>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
