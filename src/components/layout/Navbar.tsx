@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Menu, Phone, Search, ShoppingBag, X } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useCart } from "@/context/CartContext";
@@ -22,13 +23,14 @@ const menuLinks = [
 export default function Navbar() {
   const { data: session } = useSession();
   const { totalItems, setIsOpen } = useCart();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const user = session?.user;
 
   const handleLogout = async () => {
     await signOut();
-    window.location.assign("/");
+    router.push("/");
   };
 
   return (

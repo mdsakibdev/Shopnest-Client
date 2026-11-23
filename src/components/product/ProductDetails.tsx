@@ -208,7 +208,7 @@ export default function ProductDetails({ id }: { id: string }) {
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="grid gap-10 md:grid-cols-2">
         {/* Image */}
-        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg border bg-zinc-100">
+        <div className="relative aspect-3/4 w-full overflow-hidden rounded-lg border bg-zinc-100">
           {product.images[0] && (
             <Image
               src={product.images[0]}

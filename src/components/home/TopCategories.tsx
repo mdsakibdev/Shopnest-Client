@@ -85,7 +85,7 @@ export default function TopCategories() {
               href={`/shop?category=${category.slug}`}
               className="group overflow-hidden rounded-lg border bg-white hover:border-[rgb(13,148,136)]"
             >
-              <div className="relative aspect-[4/3] w-full">
+              <div className="relative aspect-4/3 w-full">
                 <Image
                   src={category.image || fallbackImages[category.slug] || ""}
                   alt={category.name}

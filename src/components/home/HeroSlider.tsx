@@ -53,7 +53,7 @@ export default function HeroSlider() {
   const slide = slides[current];
 
   return (
-    <section className="relative h-[320px] w-full overflow-hidden md:h-[440px]">
+    <section className="relative h-80 w-full overflow-hidden md:h-110">
       <Image
         src={slide.image}
         alt={slide.title}

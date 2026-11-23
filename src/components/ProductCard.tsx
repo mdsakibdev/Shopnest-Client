@@ -29,7 +29,7 @@ export default function ProductCard({ product }: { product: Product }) {
       href={`/product/${product._id}`}
       className="group overflow-hidden rounded-lg border bg-white hover:border-[rgb(13,148,136)]"
     >
-      <div className="relative aspect-[3/4] w-full bg-zinc-100">
+      <div className="relative aspect-3/4 w-full bg-zinc-100">
         {product.images[0] && (
           <Image
             src={product.images[0]}
