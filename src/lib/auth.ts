@@ -15,10 +15,31 @@ const client =
   new MongoClient(process.env.MONGODB_URI as string, {
     maxPoolSize: 10,
     maxIdleTimeMS: 60000,
+    serverSelectionTimeoutMS: 20000,
   });
 globalForMongo.mongoClient = client;
 
 const db = client.db("shopnest");
+
+// The free Atlas cluster sometimes does not answer on the first try
+// (the connection times out), which made production login fail.
+// So we ping the database a few times in the background until it
+// answers — once it does, login works. (Same fix as the server.)
+async function warmUpDatabase() {
+  for (let attempt = 1; attempt <= 6; attempt++) {
+    try {
+      await db.command({ ping: 1 });
+      console.log("ShopNest auth MongoDB connected");
+      return;
+    } catch {
+      console.log(`ShopNest auth MongoDB try ${attempt}/6 failed`);
+      if (attempt < 6) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    }
+  }
+}
+warmUpDatabase();
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
