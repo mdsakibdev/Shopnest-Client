@@ -92,7 +92,7 @@ export default function Navbar() {
             <img
               src={settings.logo}
               alt={settings.shopName || site.name}
-              className="h-9 w-auto"
+              className="h-12 w-auto"
             />
           ) : (
             <>
