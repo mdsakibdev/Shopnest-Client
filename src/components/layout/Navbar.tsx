@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, Phone, Search, ShoppingBag, X } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
-import { useCart } from "@/context/CartContext";
+import { SERVER_URL } from "@/lib/api";
 import { playfair } from "@/lib/fonts";
 import { site } from "@/lib/site";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,40 @@ const menuLinks = [
   { label: "About", href: "/about" },
 ];
 
+type ShopSettings = {
+  shopName?: string;
+  logo?: string;
+  hotline?: string;
+};
+
+// The loader lives outside the component, so the effect can set
+// state inside .then() — the pattern the Next 16 lint rule accepts.
+// A failed request simply keeps the values from lib/site.
+async function fetchSettings(): Promise<ShopSettings | null> {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/settings`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 export default function Navbar() {
-  const { data: session } = useSession();
-  const { totalItems, setIsOpen } = useCart();
   const router = useRouter();
+  const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [settings, setSettings] = useState<ShopSettings | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+    fetchSettings().then((data) => {
+      if (!ignore && data) setSettings(data);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const user = session?.user;
 
@@ -40,7 +69,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 text-xs sm:text-sm">
           <p className="flex items-center gap-1.5">
             <Phone className="h-3.5 w-3.5" />
-            Hotline: {site.hotline}
+            Hotline: {settings?.hotline || site.hotline}
           </p>
           <p className="hidden sm:block">Cash on Delivery all over Bangladesh</p>
           <Link href="/track-order" className="underline-offset-2 hover:underline">
@@ -55,7 +84,21 @@ export default function Navbar() {
           href="/"
           className={`${playfair.className} text-2xl font-bold sm:text-3xl`}
         >
-          Shop<span className="text-[rgb(13,148,136)]">Nest</span>
+          {settings?.logo ? (
+            // The logo link comes from admin Settings, so it can be
+            // from any website — a plain <img> works with every link,
+            // while next/image would need each domain allowed first.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={settings.logo}
+              alt={settings.shopName || site.name}
+              className="h-9 w-auto"
+            />
+          ) : (
+            <>
+              Shop<span className="text-[rgb(13,148,136)]">Nest</span>
+            </>
+          )}
         </Link>
 
         {/* Search — connects to the Shop page in a later step */}
@@ -77,30 +120,23 @@ export default function Navbar() {
         </form>
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
-          {/* Cart — opens the cart drawer; the badge shows the
-              live number of items in the cart */}
+          {/* Cart — drawer comes in the Cart step, count is 0 for now */}
           <button
             type="button"
             aria-label="Cart"
-            onClick={() => setIsOpen(true)}
             className="relative rounded-full p-2 hover:bg-zinc-100"
           >
             <ShoppingBag className="h-6 w-6" />
-            {totalItems > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[rgb(13,148,136)] text-[11px] font-bold text-white">
-                {totalItems}
-              </span>
-            )}
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[rgb(13,148,136)] text-[11px] font-bold text-white">
+              0
+            </span>
           </button>
 
           {user ? (
             <>
-              <Link
-                href="/account"
-                className="hidden text-sm font-medium hover:text-[rgb(13,148,136)] lg:block"
-              >
+              <span className="hidden text-sm font-medium lg:block">
                 {user.name}
-              </Link>
+              </span>
               {user.role === "admin" ? (
                 <Link href="/admin">
                   <Button variant="outline" size="sm">

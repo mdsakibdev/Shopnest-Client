@@ -13,11 +13,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// These two values move into the admin Settings in Step 14,
-// so each shop owner can set their own.
-const DELIVERY_INSIDE_DHAKA = 60;
-const DELIVERY_OUTSIDE_DHAKA = 120;
-const BKASH_NUMBER = "01700-000000";
+// Delivery charges and the shop's bKash number come from the admin
+// Settings (Step 14). These numbers are only the fallback until the
+// admin saves Settings once.
+const FALLBACK_DELIVERY_INSIDE = 60;
+const FALLBACK_DELIVERY_OUTSIDE = 120;
+const FALLBACK_BKASH_NUMBER = "01700-000000";
+
+type ShopSettings = {
+  bkashNumber?: string;
+  deliveryInside?: number;
+  deliveryOutside?: number;
+};
+
+// The loader lives outside the component, so the effect can set
+// state inside .then() — the pattern the Next 16 lint rule accepts.
+async function fetchSettings(): Promise<ShopSettings | null> {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/settings`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
 
 // The session arrives a moment after the page opens, so the
 // customer's name is filled in through this small async helper —
@@ -41,6 +60,34 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [placing, setPlacing] = useState(false);
 
+  // Delivery charges + shop bKash number from Settings
+  const [deliveryInside, setDeliveryInside] = useState(
+    FALLBACK_DELIVERY_INSIDE
+  );
+  const [deliveryOutside, setDeliveryOutside] = useState(
+    FALLBACK_DELIVERY_OUTSIDE
+  );
+  const [bkashShopNumber, setBkashShopNumber] = useState(
+    FALLBACK_BKASH_NUMBER
+  );
+
+  // Load the shop's Settings once (fallbacks above stay if it fails)
+  useEffect(() => {
+    let ignore = false;
+    fetchSettings().then((data) => {
+      if (!ignore && data) {
+        if (Number.isFinite(Number(data.deliveryInside)))
+          setDeliveryInside(Number(data.deliveryInside));
+        if (Number.isFinite(Number(data.deliveryOutside)))
+          setDeliveryOutside(Number(data.deliveryOutside));
+        if (data.bkashNumber) setBkashShopNumber(data.bkashNumber);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   // Pre-fill the name when the customer is logged in
   useEffect(() => {
     const name = session?.user?.name;
@@ -55,7 +102,7 @@ export default function CheckoutPage() {
   }, [session]);
 
   const deliveryCharge =
-    area === "inside" ? DELIVERY_INSIDE_DHAKA : DELIVERY_OUTSIDE_DHAKA;
+    area === "inside" ? deliveryInside : deliveryOutside;
   const total = subtotal + deliveryCharge;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -168,11 +215,11 @@ export default function CheckoutPage() {
               <div className="flex rounded-md border p-1">
                 {[
                   {
-                    label: `Inside Dhaka (৳${DELIVERY_INSIDE_DHAKA})`,
+                    label: `Inside Dhaka (৳${deliveryInside})`,
                     value: "inside",
                   },
                   {
-                    label: `Outside Dhaka (৳${DELIVERY_OUTSIDE_DHAKA})`,
+                    label: `Outside Dhaka (৳${deliveryOutside})`,
                     value: "outside",
                   },
                 ].map((option) => (
@@ -236,7 +283,7 @@ export default function CheckoutPage() {
               <div className="space-y-4 rounded-lg border border-dashed p-4">
                 <p className="text-sm">
                   Send Money (Personal) to:{" "}
-                  <span className="font-bold">{BKASH_NUMBER}</span>
+                  <span className="font-bold">{bkashShopNumber}</span>
                   <br />
                   Amount: <span className="font-bold">৳{total}</span> — then
                   fill in these two boxes:
