@@ -31,7 +31,7 @@ const menLinks = [
   { label: "T-shirt", href: "/shop?section=men&category=t-shirt" },
   { label: "Shirt", href: "/shop?section=men&category=shirt" },
   { label: "Polo", href: "/shop?section=men&category=polo" },
-  { label: "Pant & Trouser", href: "/shop?section=men&category=pant-trouser" },
+  { label: "Pant & Trouser", href: "/shop?section=men&category=pant-and-trouser" },
 ];
 
 const womenLinks = [
