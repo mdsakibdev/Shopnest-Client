@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ShopNest — Client
 
-## Getting Started
+A single-vendor fashion eCommerce storefront for men and women, built to sell to Bangladeshi shop owners. One shop, one owner (admin), many happy customers.
 
-First, run the development server:
+**Live demo:** https://shopnest-client-fghr.vercel.app
+**Server (API):** https://shopnest-server-fghr.vercel.app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## What customers can do
+
+- Browse 40 products across 8 sub-categories — Panjabi, T-shirt, Shirt, Polo, Pant & Trouser (Men) and Saree, Three-Piece, Kurti (Women)
+- Search, filter by sub-category, sort by price, paginate on the Shop page
+- Product details with image gallery, size + colour selector, stock status, quantity and reviews
+- Cart drawer (saved in the browser, works for guests too) and guest checkout — no account forced
+- Pay by **Cash on Delivery** or **bKash manual** (customer sends money, enters TrxID + sender number)
+- Track an order with order id + phone number, or from My Account after login
+- Register / login with email + password (register = customer only)
+
+## What the admin can do
+
+- Dashboard with today's orders, revenue, pending orders, products and low-stock alerts
+- Products and categories CRUD (images via ImgBB, sizes, colours, stock, featured, flash sale)
+- Orders: Pending → Confirmed → Shipped → Delivered (or Cancelled), verify bKash TrxID and mark payment verified
+- Banners, reviews moderation, customers list
+- **Settings — the rebranding page:** shop name, logo, hotline, bKash number, delivery charges, social links. Change these and the shop becomes the client's shop.
+
+## Tech stack
+
+- Next.js (App Router) + TypeScript, Tailwind CSS + shadcn/ui
+- BetterAuth (lives in the client, MongoDB adapter) — login / session, JWT verified by the server
+- Fonts: Playfair Display (headings + logo) + Manrope (body, buttons, prices)
+- Colours: white base, black / charcoal text, Teal accent `#0D9488` (hover `#0F766E`, light `#CCFBF1`) — light mode only in v1
+
+## Project structure
+
+```
+src/
+  app/            pages: home, shop, product/[id], checkout, track-order,
+                  my-account, about, login, register, admin/*
+  components/     layout (Navbar, Footer), product, cart, ui (shadcn)
+  context/        CartContext — cart state + localStorage
+  lib/            auth.ts (BetterAuth), api helpers
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd shopnest-client
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open http://localhost:3000
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Create `shopnest-client/.env.local` (values are yours — never commit this file):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | What it is |
+|---|---|
+| `NEXT_PUBLIC_SERVER_URL` | Server URL — `http://localhost:5000` locally, the Vercel server URL in production |
+| `MONGODB_URI` | MongoDB Atlas connection string (BetterAuth adapter) |
+| `BETTER_AUTH_SECRET` | Secret for BetterAuth sessions |
+| `BETTER_AUTH_URL` | `http://localhost:3000` locally, the Vercel client URL in production |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+- Vercel, project `shopnest-client-fghr`. Deployment Protection is OFF — route-level JWT is the real guard.
+- Function Region is **Mumbai (bom1)**, so the serverless functions sit close to the Atlas cluster.
+- After changing env vars in the Vercel dashboard, redeploy — pasting values in the dashboard editor is unreliable; the Vercel CLI (`vercel env rm` / `vercel env add`) is the reliable route.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Demo accounts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Role | Email | Password |
+|---|---|---|
+| Admin | _(fill in after creating)_ | _(fill in after creating)_ |
+| Customer | _(fill in after creating)_ | _(fill in after creating)_ |
+
+How to create them:
+
+1. **Customer** — open the live site, go to Register and create an account. That is all.
+2. **Admin** — there is no admin signup. Create the user in MongoDB directly (the `users` collection) with `role: "admin"`, the same way the first admin was created. Then change the password after handover.
+
+## Selling it to a client
+
+1. Settings: change shop name, logo, hotline, bKash number, delivery charges
+2. Replace the demo products with the client's real products
+3. Change the admin password
+4. Connect the client's own domain (optional)
+5. Hand over the admin login + this README
