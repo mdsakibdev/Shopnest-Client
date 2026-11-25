@@ -1,10 +1,16 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+// The shop logo in this file is a plain <img> on purpose: the admin pastes
+// the logo link from any image host (e.g. ImgBB), while next/image
+// only allows domains listed in the config — a pasted link would
+// break. So this one lint hint is turned off for this file.
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Menu, Phone, Search, ShoppingBag, X } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
+import { useCart } from "@/context/CartContext";
 import { SERVER_URL } from "@/lib/api";
 import { playfair } from "@/lib/fonts";
 import { site } from "@/lib/site";
@@ -40,8 +46,8 @@ async function fetchSettings(): Promise<ShopSettings | null> {
 }
 
 export default function Navbar() {
-  const router = useRouter();
   const { data: session } = useSession();
+  const { totalItems, setIsOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [settings, setSettings] = useState<ShopSettings | null>(null);
 
@@ -59,7 +65,11 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut();
-    router.push("/");
+    // Full page reload on purpose: it clears the old session
+    // completely. (A router push can leave the navbar stuck on
+    // the old login — the bug we fixed in the Login step.)
+    // eslint-disable-next-line
+    window.location.assign("/");
   };
 
   return (
@@ -85,14 +95,10 @@ export default function Navbar() {
           className={`${playfair.className} text-2xl font-bold sm:text-3xl`}
         >
           {settings?.logo ? (
-            // The logo link comes from admin Settings, so it can be
-            // from any website — a plain <img> works with every link,
-            // while next/image would need each domain allowed first.
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={settings.logo}
               alt={settings.shopName || site.name}
-              className="h-12 w-auto"
+              className="h-9 w-auto"
             />
           ) : (
             <>
@@ -120,16 +126,20 @@ export default function Navbar() {
         </form>
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
-          {/* Cart — drawer comes in the Cart step, count is 0 for now */}
+          {/* Cart — opens the cart drawer; the badge shows the
+              live number of items in the cart */}
           <button
             type="button"
             aria-label="Cart"
+            onClick={() => setIsOpen(true)}
             className="relative rounded-full p-2 hover:bg-zinc-100"
           >
             <ShoppingBag className="h-6 w-6" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[rgb(13,148,136)] text-[11px] font-bold text-white">
-              0
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[rgb(13,148,136)] text-[11px] font-bold text-white">
+                {totalItems}
+              </span>
+            )}
           </button>
 
           {user ? (
