@@ -4,15 +4,30 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SERVER_URL } from "@/lib/api";
+import { fetchJsonWithRetry } from "@/lib/fetch-retry";
 import { playfair } from "@/lib/fonts";
 import ProductCard, { type Product } from "@/components/ProductCard";
 
 // Load products from the server for one section (kept outside the
 // component, so the effect below can set state inside .then()).
+// fetchJsonWithRetry quietly retries on a cold first visit, so a
+// section no longer vanishes just because the server was waking up.
 async function fetchProducts(query: string): Promise<Product[]> {
-  const res = await fetch(`${SERVER_URL}/api/products?${query}`);
-  const data = await res.json();
+  const data = await fetchJsonWithRetry<{ products?: Product[] }>(
+    `${SERVER_URL}/api/products?${query}`
+  );
   return data.products || [];
+}
+
+// One grey placeholder card, shown while the section is loading.
+function ProductSkeleton() {
+  return (
+    <div className="animate-pulse rounded-lg border bg-white p-3">
+      <div className="aspect-square rounded bg-zinc-200" />
+      <div className="mt-3 h-4 rounded bg-zinc-200" />
+      <div className="mt-2 h-4 w-2/3 rounded bg-zinc-200" />
+    </div>
+  );
 }
 
 type Props = {
@@ -41,12 +56,19 @@ export default function ProductSection({
 
   useEffect(() => {
     let ignore = false;
-    fetchProducts(query).then((data) => {
-      if (!ignore) {
-        setProducts(data);
-        setLoading(false);
-      }
-    });
+    fetchProducts(query)
+      .then((data) => {
+        if (!ignore) {
+          setProducts(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        // Even after the retries the server did not answer — stop
+        // loading; the section then hides itself (below), so the
+        // home page never shows a broken half-empty section.
+        if (!ignore) setLoading(false);
+      });
     return () => {
       ignore = true;
     };
@@ -82,7 +104,11 @@ export default function ProductSection({
       </div>
 
       {loading ? (
-        <p className="mt-6 text-zinc-500">Loading products...</p>
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ProductSkeleton key={i} />
+          ))}
+        </div>
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           {products.map((product) => (

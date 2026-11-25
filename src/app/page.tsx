@@ -2,6 +2,7 @@ import { Banknote, RefreshCcw, ShieldCheck, Truck } from "lucide-react";
 import HeroSlider from "@/components/home/HeroSlider";
 import TopCategories from "@/components/home/TopCategories";
 import ProductSection from "@/components/home/ProductSection";
+import Reveal from "@/components/Reveal";
 import { playfair } from "@/lib/fonts";
 
 // Home page (Server Component) — it only arranges the sections.
@@ -10,41 +11,53 @@ export default function HomePage() {
   return (
     <main>
       <HeroSlider />
-      <TopCategories />
 
-      <ProductSection
-        title="Flash Sale"
-        subtitle="Big discounts for a limited time — grab yours before stock runs out"
-        tag="Limited Time"
-        query="flashSale=true&limit=8"
-        viewAllLink="/shop"
-        bg="bg-red-50"
-      />
+      <Reveal>
+        <TopCategories />
+      </Reveal>
 
-      <ProductSection
-        title="Men's Collection"
-        subtitle="Panjabi, T-shirt, Shirt, Polo and more for men"
-        query="section=men&limit=8"
-        viewAllLink="/shop?section=men"
-      />
+      <Reveal>
+        <ProductSection
+          title="Flash Sale"
+          subtitle="Big discounts for a limited time — grab yours before stock runs out"
+          tag="Limited Time"
+          query="flashSale=true&limit=8"
+          viewAllLink="/shop"
+          bg="bg-red-50"
+        />
+      </Reveal>
 
-      <ProductSection
-        title="Women's Collection"
-        subtitle="Saree, Three-Piece and Kurti for women"
-        query="section=women&limit=8"
-        viewAllLink="/shop?section=women"
-        bg="bg-[rgb(204,251,241)]/40"
-      />
+      <Reveal>
+        <ProductSection
+          title="Men's Collection"
+          subtitle="Panjabi, T-shirt, Shirt, Polo and more for men"
+          query="section=men&limit=8"
+          viewAllLink="/shop?section=men"
+        />
+      </Reveal>
 
-      <ProductSection
-        title="New Arrivals"
-        subtitle="The newest products in the shop"
-        query="limit=8"
-        viewAllLink="/shop"
-        bg="bg-zinc-50"
-      />
+      <Reveal>
+        <ProductSection
+          title="Women's Collection"
+          subtitle="Saree, Three-Piece and Kurti for women"
+          query="section=women&limit=8"
+          viewAllLink="/shop?section=women"
+          bg="bg-[rgb(204,251,241)]/40"
+        />
+      </Reveal>
+
+      <Reveal>
+        <ProductSection
+          title="New Arrivals"
+          subtitle="The newest products in the shop"
+          query="limit=8"
+          viewAllLink="/shop"
+          bg="bg-zinc-50"
+        />
+      </Reveal>
 
       {/* Why Shop With Us — simple trust points, no data needed */}
+      <Reveal>
       <section>
         <div className="mx-auto max-w-7xl px-4 py-12">
           <h2
@@ -84,6 +97,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </Reveal>
     </main>
   );
 }

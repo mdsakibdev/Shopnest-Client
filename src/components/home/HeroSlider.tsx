@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SERVER_URL } from "@/lib/api";
+import { fetchJsonWithRetry } from "@/lib/fetch-retry";
 import { playfair } from "@/lib/fonts";
 
 // The loader lives outside the component, so the effect can set
@@ -17,10 +18,22 @@ type BannerSlide = {
   link: string;
 };
 
+type RawBanner = {
+  image: string;
+  title: string;
+  subtitle?: string;
+  buttonText?: string;
+  link?: string;
+};
+
+// fetchJsonWithRetry quietly retries on a cold first visit, so the
+// admin's real banners show up instead of the built-in slides just
+// because the server was waking up.
 async function fetchBanners(): Promise<BannerSlide[]> {
   try {
-    const res = await fetch(`${SERVER_URL}/api/banners?active=true`);
-    const data = await res.json();
+    const data = await fetchJsonWithRetry<RawBanner[]>(
+      `${SERVER_URL}/api/banners?active=true`
+    );
     if (!Array.isArray(data)) return [];
     return data.map((b) => ({
       image: b.image,

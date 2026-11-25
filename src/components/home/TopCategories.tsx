@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { SERVER_URL } from "@/lib/api";
+import { fetchJsonWithRetry } from "@/lib/fetch-retry";
 import { playfair } from "@/lib/fonts";
 
 type Category = {
@@ -19,28 +20,42 @@ type Category = {
 // later from Admin → Categories → Edit.
 const fallbackImages: Record<string, string> = {
   panjabi:
-    "https://images.pexels.com/photos/36981453/pexels-photo-36981453.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600&auto=format&fit=crop",
   "t-shirt":
     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop",
   shirt:
     "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop",
   polo: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?q=80&w=600&auto=format&fit=crop",
-  "pant-and-trouser":
+  "pant-trouser":
     "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=600&auto=format&fit=crop",
   saree:
-    "https://images.pexels.com/photos/30703872/pexels-photo-30703872.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.unsplash.com/photo-1610189844806-447fc9e4b57c?q=80&w=600&auto=format&fit=crop",
   "three-piece":
-    "https://images.pexels.com/photos/20690511/pexels-photo-20690511.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=600&auto=format&fit=crop",
   kurti:
-    "https://images.pexels.com/photos/2558681/pexels-photo-2558681.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop",
 };
 
 // Load categories from the server (kept outside the component,
 // so the effect below can set state inside .then()).
+// fetchJsonWithRetry quietly retries on a cold first visit, so the
+// categories no longer go missing just because the server was
+// waking up.
 async function fetchCategories(): Promise<Category[]> {
-  const res = await fetch(`${SERVER_URL}/api/categories`);
-  const data = await res.json();
+  const data = await fetchJsonWithRetry<Category[]>(
+    `${SERVER_URL}/api/categories`
+  );
   return Array.isArray(data) ? data : [];
+}
+
+// One grey placeholder card, shown while categories are loading.
+function CategorySkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-lg border bg-white">
+      <div className="aspect-4/3 w-full bg-zinc-200" />
+      <div className="mx-auto my-3 h-4 w-1/2 rounded bg-zinc-200" />
+    </div>
+  );
 }
 
 export default function TopCategories() {
@@ -49,12 +64,16 @@ export default function TopCategories() {
 
   useEffect(() => {
     let ignore = false;
-    fetchCategories().then((data) => {
-      if (!ignore) {
-        setCategories(data);
-        setLoading(false);
-      }
-    });
+    fetchCategories()
+      .then((data) => {
+        if (!ignore) {
+          setCategories(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!ignore) setLoading(false);
+      });
     return () => {
       ignore = true;
     };
@@ -72,7 +91,11 @@ export default function TopCategories() {
       </div>
 
       {loading ? (
-        <p className="mt-8 text-center text-zinc-500">Loading categories...</p>
+        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <CategorySkeleton key={i} />
+          ))}
+        </div>
       ) : categories.length === 0 ? (
         <p className="mt-8 text-center text-zinc-500">
           Categories are coming soon.

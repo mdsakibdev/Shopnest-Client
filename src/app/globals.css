@@ -128,3 +128,11 @@
     @apply font-sans;
   }
 }
+
+/* ---- Add these lines at the very END of src/app/globals.css ----
+   Smooth scrolling for the whole shop (anchor jumps and
+   back-to-top style moves glide instead of jumping). */
+
+html {
+  scroll-behavior: smooth;
+}
