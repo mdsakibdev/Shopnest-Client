@@ -26,10 +26,10 @@ const fallbackImages: Record<string, string> = {
   shirt:
     "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop",
   polo: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?q=80&w=600&auto=format&fit=crop",
-  "pant-trouser":
+  "pant-and-trouser":
     "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=600&auto=format&fit=crop",
   saree:
-    "https://images.unsplash.com/photo-1610189844806-447fc9e4b57c?q=80&w=600&auto=format&fit=crop",
+    "https://images.pexels.com/photos/13679117/pexels-photo-13679117.jpeg?auto=compress&cs=tinysrgb&w=600",
   "three-piece":
     "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=600&auto=format&fit=crop",
   kurti:
